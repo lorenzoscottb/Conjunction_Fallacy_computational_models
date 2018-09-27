@@ -154,11 +154,14 @@ def w2v_vec(word):
     return vec
 
 
-def gn2vec(words):
+def gn2vec(words, corpus_dir):
 
-    "extract vectors from google news vectorized corpus"
+    """""
+    extract vectors from google news vectorized corpus.
+    needs direcrory to text Gogle news corpus, that can be downladed 
+    """"
 
-    dir = '/Users/lorenzoscottb/Documents/corpora/googlenews.txt'
+    dir = corpus_dir
 
     words = [w for w in words if w not in en_stop]
     vec = []
@@ -220,14 +223,17 @@ dh1 = "literature or humanities"
 
 
 # Pure stimuli
-st = pd.read_excel('/Users/lorenzoscottb/Documents/università/data/cnj_fllc/'
-                   'stimuli.xlsx')
+# stimuli
+stimuli_dir = str(input())   # stimuli can be downloaded in the directory
+st = pd.read_excel(stimuli_dir) 
 st_option = st.values
 st_desc = st.columns
 
+
 # subjects' data (values[x] = subj_x)
-data = pd.read_excel('/Users/lorenzoscottb/Documents/università/data/cnj_fllc/'
-                     'data.xlsx')
+data_dir = str(input())
+data = pd.read_excel(data_dir) 
+
 values = data.values
 columns = data.columns
 
@@ -268,7 +274,7 @@ for i in range(0, round(len(desc))):
             vocabulary.append(t)
 
 
-w2v = gn2vec(vocabulary)
+w2v = gn2vec(vocabulary, corpus_dir)
 
 desc_x_fallacy = dict(zip(desc[0:41],
                           [(fallacy[e], fallacy[e+41]) for e in
