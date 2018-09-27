@@ -39,10 +39,6 @@ from gensim import corpora, models
 
 #############################################
 
-# Test example
-e = 'thoughtful creative constructive'
-h1 = 'a writer'
-h12 = 'a writer who likes writing'
 
 en_stop = stopwords.words('english')
 en_stop.append("'d")
@@ -197,7 +193,7 @@ def rescale(values, new_min = 0, new_max = 100):
 
 #############################################
 
-
+# variable for test, from Tversky and Kahneman, 1983
 linda = "Linda is 31 years old, single, outspoken and very bright. "\
          "She majored in philosophy. "\
          "As a student, she was deeply concerned with issues "\
@@ -237,7 +233,7 @@ columns = data.columns
 
 
 # extracting '%' of fallacy for description (in original, desc have index 2-83)
-subj_numb = 38  # normal = 38
+subj_numb = int(input())
 fallacy = []  # percentage of fallacy per description
 desc = []    # all description (repeated)
 option = []  # the presented options per description
@@ -274,25 +270,11 @@ for i in range(0, round(len(desc))):
 
 w2v = gn2vec(vocabulary)
 
-# text_file = open("bhatia_vocabulary.txt", "w")
-# text_file.write(str(w2v))
-# text_file.close()
-#
-bt_vectors = '/Users/lorenzoscottb/Documents/università/data/cnj_fllc/' \
-       'bhatia_vocabulary.txt'
-
 desc_x_fallacy = dict(zip(desc[0:41],
                           [(fallacy[e], fallacy[e+41]) for e in
                            range(int(len(fallacy)/2))]))
 
 desc_x_option = dict(zip(desc, option))
-
-# makes a data frame out of the dictionary
-# dtfr = pd.DataFrame(desc_x_fallacy).transpose()
-# ax = dtfr.plot.bar(rot=45)
-# #gca().get_xaxis().get_major_formatter().set_useOffset(False)
-# #matplotlib.rc('axes.formatter', useoffset=False)
-
 
 ##############################################
 
@@ -321,16 +303,6 @@ for i in range(0, len(fallacy)):
 all_vec = w2v_opt + w2v_desc
 norm_intervall = [vector_norm(_) for _ in all_vec]
 
-# Pure cs
-w2v_gap = []
-# gap predicted by models, + gap: non fllc behav, - gap: non fllc behav
-for i in range(0, len(desc)):
-    txw = w2v_desc[i]
-    v_nfw = w2v_opt[i][0]
-    v_fw = w2v_opt[i][1]
-    w2v_gap.append(round((cs(txw, v_nfw) - cs(txw, v_fw)), 3))
-
-
 # BHATIA'S
 cs_values = []
 for i in range(0, len(desc)):
@@ -347,7 +319,7 @@ for b in range(len(cs_values)):
     bt_gap.append(softmax(cs_values[b])[0]-softmax(cs_values[b])[1])
 
 
-# M-A
+# Rad algorithm
 w2v_e = []
 w2v_h1 = []
 w2v_h2 = []
@@ -365,111 +337,6 @@ for i in range(0, len(desc)):
     ma_values.append([eh1, eh2, h1h2])
 
 ma_fall = [e[1]*e[2]*(1-e[0]) for e in ma_values]
-
-# Kintsch
-k_gap = []
-k_fall =[]
-softmax = lambda x : np.exp(x)/np.sum(np.exp(x))
-# gap predicted by models, + gap: non fllc behav, - gap: non fllc behav
-for i in range(0, len(desc)):
-    txw = w2v_desc[i]
-    v_nfw = w2v_opt[i][0]
-    v_fw = w2v_opt[i][1]
-    k_gap.append(round((k_sim(txw, v_nfw) - k_sim(txw, v_fw)), 3))
-    k_fall.append(round((softmax((k_sim(txw, v_nfw), k_sim(txw, v_fw)))[1]), 3))
-    print(k_sim(txw, v_nfw), k_sim(txw, v_fw))
-
-
-# Kintsch-MA
-# per standardizzare k_sim: f(a) = 1/(x+y)(a+x) with range(-x,y)
-# f_a = lambda a: (a+max(norm_intervall))/(max(norm_intervall)*2)
-# kma_values = []
-# for i in range(0, len(desc)):
-#     eh1 = f_a(k_sim(w2v_e[i], w2v_h1[i][0]))
-#     eh2 = f_a(k_sim(w2v_e[i], w2v_h2[i][0]))
-#     h1h2 = f_a(k_sim((w2v_e[i]+w2v_h1[i][0]), (w2v_e[i]+w2v_h2[i][0])))
-#     kma_values.append([eh1, eh2, h1h2])
-#
-# kma_fall = [e[1]*e[2]*(1-e[0]) for e in kma_values]
-
-
-# Correlations
-Rw2v = pearsonr(w2v_gap, fllc_gap)
-Rbt = pearsonr(bt_fall, fallacy)
-Rma = pearsonr(ma_fall, fallacy)
-Rkma = pearsonr(norm_kma_fall, fallacy)
-Rk = pearsonr(k_gap, fllc_gap)
-print('Cosine Similarity correlation: ' + str(Rw2v) + '\n'
-      + 'Bhatia\'s correlation: ' + str(Rbt) + '\n'
-      + 'Ma model correlation: ' + str(Rma) + '\n'
-      + 'Kintsch-Ma model correlation: ' + str(Rkma))
-
-##############################################
-
-#  Plots
-
-#############################################
-
-# seaborn grid settings
-sns.set(color_codes=True)
-sns.set_style("whitegrid")
-
-# visualize the behevior of the different desctiptions
-sns.factorplot(x=1, y=0, data=dtfr)
-
-
-# Correlation with regression line
-x = fllc_gap
-y = bt_gap
-fit = polyfit(x, y, 1)
-fit_fn = poly1d(fit)
-ax = plt.subplot(111)
-ax.plot(x, y, '.r', x, fit_fn(x), 'b')
-plt.ylabel('model\'s distribution')
-plt.xlabel('fallacy distribution')
-plt.title('W2V\'s model fit')
-# Hide the right and top spines
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-# Only show ticks on the left and bottom spines
-ax.yaxis.set_ticks_position('left')
-ax.xaxis.set_ticks_position('bottom')
-plt.show()
-
-
-# multiple correlation
-col_name = [data['Bhatia prob'][0:82], data['Ma prob'][0:82], k_gap]
-mdl_name = ['Bhatia', 'Ma', "Kintsch Ma"]
-y_va = [data['Fallacy percentage'][0:82], data['Fallacy percentage'][0:82], fllc_gap]
-
-for e in range(len(mdl_name)):
-    x = y_va[e]
-    y = col_name[e]
-    plt.subplot(1, 3, (1 + e))
-    btg = sns.regplot(y=y, x=x
-                      , data=data)
-    # btg.set_axis_labels("Fallcy percentage", "models estimations")
-    if e == 0:
-        plt.ylabel('Model\' estimation')
-    else:
-        plt.ylabel('')
-    plt.title(mdl_name[e])
-    # plt.scatter(x, y)
-plt.show()
-
-
-# Single correlation with regression line (wiht seaborn)
-btg = sns.regplot(x="Fallacy percentage", y="Bhatia prob"
-                  , data=data)
-btg.set_axis_labels("Fallcy percentage", "models estimations")
-
-# multiple correlation with regression line (wiht seaborn)
-btg = sns.lmplot(x="double N", y="bt-ma", hue="Models",
-                  data=data)
-btg.set_axis_labels("Fallcy percentage", "models estimations")
-
-
-
 
 
 
