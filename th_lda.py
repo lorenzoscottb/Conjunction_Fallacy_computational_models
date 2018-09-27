@@ -1,57 +1,24 @@
 
 """""""""
+author: loreznoscottb
 
-##############################################
 
-#  Term-Freq matrix for Z measure evaluation
+ for now, h can have max 2 words in it
+ length h can be 1 or 2 for now
+ p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
 
-#############################################
+ Z Confirmation Measure:
+ 
+    if p(A | E) ≥ p(A):
+        Z(A, E) = (p(A | E) - p(A)) / (1 - p(A)
+    else:
+        Z(A, E) = (p(A | E) - p(A)) / p(A)
+   
+  for now, h can have max 2 words in it
+  length h can be 1 or 2 for now
+  p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
 
-# # A test
-# t =["trump man blond", " this is a trump blond air text",
-#     "here o will talk about a blond man", "a rich tall blond man"]
-# 
-# 
-# # Term-freq vectorizer:
-# vectorizer = CountVectorizer(strip_accents='unicode', stop_words='english')
-# 
-# 
-# # Build the tfidf vectorizer from the training data ("fit"), and apply it
-# # ("transform")
-# tdm_tf = vectorizer.fit_transform(pg)
-# 
-# # Get the words that correspond to each of the features.
-# feat_names = vectorizer.get_feature_names()
-# print('Done, result is a', tdm_tf.shape, "matrix.\nActual number of features:", len(feat_names))
-# 
-# # Print ten random terms from the vocabulary
-# print("Some random words in the vocabulary:")
-# for i in range(0, 10):
-#     featNum = randint(0, len(feat_names))  # have to import random twice
-#     print("  %s" % feat_names[featNum])
-# 
-# print('Rotating the matrix')
-# tfm = tdm_tf.toarray()  # TD matrix to array
-# tfm = np.rot90(tfm, 3)  # matrix rotated
-# 
-# # collecting Z prediction
-# z_fit = []
-# fll_fit = []
-# for i in range(0, len(desc)):
-#     h1 = option[i][0]
-#     if len(nltk.word_tokenize(h1)) > 2:
-#         continue
-#     h12 = option[i][1]
-#     e = desc[i].strip('.1')
-#     if fallacy[i] < 50:
-#         fll_fit.append(0)
-#     elif fallacy[i] == 50:
-#         fll_fit.append(2)
-#     else:
-#         fll_fit.append(1)
-#     z = tentori_impact(h1, h12, e)
-#     z_fit.append(z)
-#     print('done withe iteration ', i+1)
+
 """""""""
 
 ##############################################
@@ -80,90 +47,6 @@ from gensim.test.utils import datapath
 #  Methods
 
 #############################################
-
-
-def tentori_impact(h1, h12, e, tfm):
-
-    """""""""""
-    tfm is a term frequency matrix
-    computes the similarity using Tentori idea, the confirmation factor
-    is Z measure. h1 must be the 'single word' hypothesis, h12 is the 
-    'fallacious' one
-    !!!  for now, h12 = h1+ another word !!!!!!!
-    !!!!! if using contvect rotate matrix (t = np.rot90(tfm, 3))
-    """""
-
-    punctuations = list(string.punctuation)
-    sign = lambda a: 1 if a > 0 else -1 if a < 0 else 0
-    sw = ['a', 'an', 'who', 'likes', 'like', 'is']
-    h1 = [tk for tk in nltk.word_tokenize(h1) if tk not in sw
-          and tk not in punctuations]
-    h12 = [tk for tk in nltk.word_tokenize(h12) if tk not in sw
-           and tk not in str(h1).strip('[').strip(']')
-           and tk not in punctuations]
-    e = [tk for tk in nltk.word_tokenize(e) if tk not in punctuations]
-
-    # evaluating Tentori's similarity impact: evaluating Z on each
-    ch1e = []
-    ch12e = []
-    for r in range(0, len(e)):
-
-        vec_ph1 = tfm[vectorizer.vocabulary_.get(h1[0])]
-        vec_ph2 = tfm[vectorizer.vocabulary_.get(h12[0])]
-        vec_e = tfm[vectorizer.vocabulary_.get(e[r])]
-
-        # Extracting C for each word in evidence e (Z)
-        coh12 = 0
-        coh1e = 0
-        coh12e = 0
-        for i in range(0, tfm.shape[1]):
-            # co-occurence h1,e
-            if vec_ph1[i] != 0 and vec_e[i] != 0:
-                coh1e += 1
-                # co-occurence h12,e
-            if vec_ph1[i] != 0 and vec_e[i] != 0 and vec_ph2[i] != 0:
-                coh12e += 1
-            # co-occurence h12
-            if vec_ph1[i] != 0 and vec_ph2[i] != 0:
-                coh12 += 1
-
-        def bayes(prh, preh, pre):
-            b = (prh - (preh / prh+0.01)) / pre+0.01
-            return b
-
-        # extracting probability
-        pe = sum(vec_e) / tfm.shape[1]+0.01
-        ph1 = sum(vec_ph1)/ tfm.shape[1]+0.01
-        ph12 = coh12 / tfm.shape[1]+0.01
-        ph1e = bayes(ph1, (coh1e/ph1), pe)
-        ph12e = bayes(ph12, (coh12e/ph12), pe)
-
-        # computing C
-        # for h1,e
-        if ph1e >= ph1:
-            zh1e = (ph1e - ph1)/1 - ph1
-        else:
-            zh1e = (ph1e - ph1) / ph1
-        ch1e.append(zh1e)
-
-        # for h12,e
-        if ph12e >= ph12:
-            zh12e = (ph12e - ph12) / 1 - ph12
-        else:
-            zh12e = (ph12e - ph12) / ph12
-        ch12e.append(zh12e)
-
-    # evaluating impact 1: fallacious; 0: non fallacious
-    impact = []
-    # for i in range(0, len(ch12e)):
-    #     if sign(ch1e[i]) == sign(ch12e[i]):
-    #         impact.append(abs(ch1e[i])-abs(ch12e[i]))
-    #     else:
-    #         impact.append(abs(ch1e[i]) + abs(ch12e[i]))
-    if abs(sum(ch1e)) > abs(sum(ch12e)):
-        return 0
-    if abs(sum(ch1e)) < abs(sum(ch12e)):
-        return 1
 
 
 def lda_complete_vector(string, model):
@@ -285,56 +168,23 @@ def z_measure(e, h, model, matrix, vocabulary, corpus):
 
 #############################################
 
-print('Corpus to use?\nfolder\nguardian\nen_train\nsmall_train'
-      '\nep_it\npaisa_raw\n')
-
-c = input()
+c = input() # directory to corpus
 
 print('\nstarting LDA training, how many topics?')
 
-topic_number = int(input())  # 300 as the demention of vector space
-
-# corpus selection
-if c == 'folder':
-    corpus = '/Users/lorenzoscottb/Documents/corpora'
-    words = 'en'
-    file = 'collection'
-
-if c == 'guardian':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/Guardian/' \
-          'TheGuardian.com_Articles_Corpus'
-    words = 'en'
-    file = 'collection'
-
-if c == 'en_train':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/en_train'
-    words = 'en'
-    file = 'collection'
-
-if c == 'small_train':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/small_train'
-    words = 'en'
-    file = 'collection'
-
-if c == 'ep_it':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/europarl/it-en/it-en_it.txt'
-    words = 'it'
-    file='file'
-
-if c == 'paisa_raw':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/paisa.raw.txt'
-    words = 'it'
-    file = 'collection'
+topic_number = int(input())  
+words = str(input())
+passes = int(input())
 
 # corpus to LDA space, corpus needed to extract p(a)
-lda_text, dictionary, lda = doc2lda(corpus, words, topic_number, 5, file=file)
+lda_text, dictionary, lda = doc2lda(corpus, words, topic_number, passes, file=file)
 
 #  printing the topics
 for idx, topic in lda.print_topics(-1):
     print('Topic: {} \nWords: {}'.format(idx, topic))
 
 # save model
-temp_file = datapath('lda_it')
+temp_file = datapath('lda_th')
 lda.save(temp_file)
 
 ##############################################
@@ -343,6 +193,8 @@ lda.save(temp_file)
 
 #############################################
 
+
+# description fro test
 linda = "Linda is 31 years old, single, outspoken and very bright. "\
          "She majored in philosophy. "\
          "As a student, she was deeply concerned with issues "\
@@ -368,15 +220,16 @@ dh1 = "literature or humanities"
 
 
 # stimuli
-st = pd.read_excel('/Users/lorenzoscottb/Documents/università/data/cnj_fllc/'
-                   'stimuli.xlsx')
+stimuli_dir = str(input())   # stimuli can be downloaded in the directory
+st = pd.read_excel(stimuli_dir) 
 st_option = st.values
 st_desc = st.columns
 
 
 # subjects' data (values[x] = subj_x)
-data = pd.read_excel('/Users/lorenzoscottb/Documents/università/data/cnj_fllc/'
-                     'data.xlsx')
+data_dir = str(input())
+data = pd.read_excel(data_dir) 
+
 values = data.values
 columns = data.columns
 
@@ -458,7 +311,7 @@ phebt = p_he(linda, ['bank', 'teller'], lda, topics_terms_prob, wor_index)
 phef = p_he(linda, 'feminist', lda, topics_terms_prob, wor_index)
 
 
-#  Tentori approach
+#  extracting confirmation values
 conf_values = []
 fll_to_predict = []
 for c, v in enumerate(t_e):
@@ -474,89 +327,10 @@ for c, v in enumerate(t_e):
                             word_index, lda_text)
         conf_values.append([c_e_h1, c_e_h2, c_h1_h2])
 
-# ceh1 = [conf_values[_][0] for _ in range(len(conf_values))]
-# ceh2 = [conf_values[_][1] for _ in range(len(conf_values))]
-# ch1h2 = [conf_values[_][2] for _ in range(len(conf_values))]
+
 z_ma_values = [((p[1]+1)/2)*((p[2]+1)/2)*(1-((p[0]+1)/2)) for p in conf_values]
 z_h1_h2 = [s[2] for s in conf_values]
 rt = pearsonr(z_ma_values, fll_to_predict)
 rh1h2 = pearsonr(z_h1_h2, fll_to_predict)
 print('R tentori: '+str(rt)+'\n'+'R h1-h2: '+str(rh1h2))
 
-# Wajima et al. approach:
-# corerlation with % fallcy - c(h1,h2|e)-c(h1|e) and %fllc - c(h1,h2|e)-c(h2|e)
-w_values = []
-wfll_to_predict = []
-for c, v in enumerate(e):
-    if len(h1[c]) == 1 and len(h2[c]) == 1:
-        print('Extracting Z values.\ne: ' + str(v) + '\nh1: '
-              + str(h1[c]) + '\nh2: ' + str(h2[c]))
-        wfll_to_predict.append(fallacy[c])
-        c_e_h1 = z_measure(v.strip('.1').strip("\'"), h1[c], lda, topics_terms_prob,
-                           word_index, lda_text)
-        c_e_h2 = z_measure(v.strip('.1').strip("\'"), h2[c], lda, topics_terms_prob,
-                           word_index, lda_text)
-        c_e_h1h2 = z_measure(v.strip('.1').strip("\'"), h1[c]+h2[c], lda, topics_terms_prob,
-                             word_index, lda_text)
-        w_values.append([c_e_h1, c_e_h2, c_e_h1h2])
-
-wz1_ma_values = [p[2]-p[0] for p in w_values]
-wz2_ma_values = [p[2]-p[1] for p in w_values]
-rw1 = pearsonr(wz1_ma_values, wfll_to_predict)
-rw2 = pearsonr(wz2_ma_values, wfll_to_predict)
-
-
-##############################################
-
-#  Plots
-
-#############################################
-
-# Correlation with regression line
-# seaborn grid settings
-sns.set(color_codes=True)
-sns.set_style("whitegrid")
-
-x = wfll_to_predict
-y = z_ma_values
-fit = polyfit(x, y, 1)
-fit_fn = poly1d(fit)
-ax = plt.subplot(111)
-ax.plot(x, y, '.r', x, fit_fn(x), 'b')
-plt.ylabel('model\'s prediction')
-plt.xlabel('fallacy distribution')
-plt.title('Z measure\'s model prediction')
-# Hide the right and top spines
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-# Only show ticks on the left and bottom spines
-ax.yaxis.set_ticks_position('left')
-ax.xaxis.set_ticks_position('bottom')
-plt.show()
-
-
-# multiple correlation
-mdl_name = ['TZ - Ma', "Z - h1h2"]
-y_z = [data['ceh1'][0:76], data['ceh2'][0:76], data['ch1h2'][0:76]]
-x_z = [data['Fallacy percentage'][x] for x in range(len(data['Fallacy percentage'][0:82]))
-       if len(h1[x]) < 3 and len(h2[x]) < 3]
-y_va = [z_ma_values, z_h1_h2]
-
-for e in range(len(y_z)):
-    y = x_z
-    x = y_z[e]
-    plt.subplot(1, 3, (1 + e))
-    btg = sns.regplot(y=y, x=x)
-    # btg.set_axis_labels("Fallcy percentage", "models estimations")
-    if e == 0:
-        plt.ylabel('Model\' estimation')
-    else:
-        plt.ylabel('')
-    plt.title(mdl_name[e])
-    # plt.scatter(x, y)
-plt.show()
-
-
-z_ma_values = [(data['ceh1'][0:76])[p]*(data['ceh2'][0:76])[p]*(1-((data['ch1h2'][0:76])[p])) for p in range(0, 76)]
-
-btg = sns.regplot(y=z_ma_values, x=x_z)
