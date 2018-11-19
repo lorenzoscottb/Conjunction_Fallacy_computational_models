@@ -1,19 +1,21 @@
 
 """""""""
 author: loreznoscottb
- for now, h can have max 2 words in it
- length h can be 1 or 2 for now
- p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
- Z Confirmation Measure:
 
-    if p(A | E) ≥ p(A):
-        Z(A, E) = (p(A | E) - p(A)) / (1 - p(A)
-    else:
-        Z(A, E) = (p(A | E) - p(A)) / p(A)
+for now, h can have max 2 words in it
+length h can be 1 or 2 for now
+p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
 
-  for now, h can have max 2 words in it
-  length h can be 1 or 2 for now
-  p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
+Z Confirmation Measure:
+
+   if p(A | E) ≥ p(A):
+       Z(A, E) = (p(A | E) - p(A)) / (1 - p(A)
+   else:
+       Z(A, E) = (p(A | E) - p(A)) / p(A)
+
+for now, h can have max 2 words in it
+length h can be 1 or 2 for now
+p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
 """
 
 ##############################################
@@ -170,30 +172,26 @@ c = input()
 print('length of vector\'s dimensions?')
 dim = round(float(input()))
 
-if c =='folder':
-    corpus = '/Users/lorenzoscottb/Documents/corpora'
-if c == 'guardian':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/Guardian/' \
-          'TheGuardian.com_Articles_Corpus'
-if c == 'en_train':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/en_train'
-if c == 'small_train':
-    corpus = '/Users/lorenzoscottb/Documents/corpora/small_train'
+print('Enter dir to corpus..)
+corpus = str(input())
 
 print('\nstarting LDA training, how many topics?')
-
-words = str(input())
+dim = str(input())
 
 # corpus to LDA space, corpus needed to extract p(a)
-lda_text, dictionary, lda = doc2lda(corpus, 'en', 300, 5, file=file)
+lda_text, dictionary, lda = doc2lda(corpus, 'en', dim, 5, file=file)
 
 #  printing the topics
 for idx, topic in lda.print_topics(-1):
     print('Topic: {} \nWords: {}'.format(idx, topic))
 
 # save model
-temp_file = datapath('lda_th')
-lda.save(temp_file)
+print('Model is ready, save it? [yes/no]')
+save_model = str(input())
+
+if save_model == 'yes':     
+   temp_file = datapath('lda_th')
+   lda.save(temp_file)
 
 ##############################################
 
@@ -201,55 +199,17 @@ lda.save(temp_file)
 
 #############################################
 
-
-# description for test
-linda = "Linda is 31 years old, single, outspoken and very bright. " \
-        "She majored in philosophy. " \
-        "As a student, she was deeply concerned with issues " \
-        "of discrimination " \
-        "and social justice, and also participated " \
-        "in pro peace demonstrations."
-lh1 = 'bank teller'
-lh2 = 'feminist'
-
-bill = "Bill is 34 years old. He is intelligent, but unimaginative, " \
-       "compulsive,and generally lifeless. In school, he was strong in" \
-       " mathematics but weak in social studies and humanities."
-bh1 = "plays jazz for a hobby "
-bh2 = "is an accountant"
-
-
-daniel = "Sensitive and introspective. In high school she wrote poetry " \
-         " secretly. Did her military service as a teacher. " \
-         "Though beautiful, she has little social life, " \
-         "since she prefers to spend her time reading quietly " \
-         "at home rather than partying."
-dh1 = "literature or humanities"
-
-
 # Pure stimuli
-st = pd.read_excel('/Users/lb540/Documents/uni/data/cnj_fllc/'
-                   'stimuli.xlsx')
+st = pd.read_excel('path/to/stimuli.xlsx')  # can be downladed in directory 
 options = st.values
 scenarios = st.columns
 
 # subjects' data (values[x] = subj_x)
-data = pd.read_excel('/Users/lb540/Documents/uni/data/cnj_fllc/'
-                     'data.xlsx')
-sb_values = data.values
-sb_columns = data.columns
-
-# Tentori et al., 2013 stimuli
-tnt = pd.read_excel('/Users/lorenzoscottb/Documents/unì/data/cnj_fllc/'
-                    'tentori.xlsx')
-tnt_values = tnt.values
-tnt_columns = tnt.columns
-
+data = pd.read_excel('path/to/data.xlsx')
 
 # extracting '%' of fallacy for description (in original, desc have index 2-83)
 subj_numb = 38  # normal = 38
-scenarios_tested = 75
-fallacy = data['Fallacy percentage'][0:82]
+fallacy = data['fallacy percentage'][0:82]  # assume you a fallacy_x_scenario variable in collected data 
 
 # vocabulary of all stimuli
 # vocabulary = [word.strip('.1') for word in set(nltk.word_tokenize(str(options+scenarios))) if
@@ -281,13 +241,8 @@ topics_terms = lda.state.get_lambda()
 topics_terms_prob = np.apply_along_axis(lambda x: x/ x.sum(), 1, topics_terms)
 word_index = dict(lda.id2word)  # creates a index-word dictionaries
 
-# # Test on Linda
-# phebt = p_he(linda, ['bank', 'teller'], lda, topics_terms_prob, wor_index)
-# phef = p_he(linda, 'feminist', lda, topics_terms_prob, wor_index)
-
 #  extracting confirmation values
 conf_values = []
-fll_to_predict = []
 for c, v in enumerate(e):
     if len(h1[c]) < 3 and len(h2[c]) < 3:
         print('Computing Z values\ne: ' + str(v) + '\nh1: '
@@ -307,16 +262,7 @@ for c, v in enumerate(e):
 
 
 z_rad_values = [((p[1] + 1) / 2) * ((p[2] + 1) / 2) * (1 - ((p[0] + 1) / 2)) for p in conf_values]
-rt = pearsonr(z_ma_values, fll_to_predict)
-print('R correlation Rad Model - Observed fallacy:  ' + str(rt))
-
-# ch1e = data['ceh1'][0:76]
-# ch2e = data['ceh2'][0:76]
-# ch1h2 = data['ch1h2'][0:76]
-#
-# # sim(e, h2) ∙ sim(eɅh1, eɅh2) ∙ (1 − sim(e, h1))
-# z_values = [data['ceh2'][0:76][p] * data['ch1h2'][0:76][p] *
-#             (data['ceh1'][0:76][p]) for p in range(len(data['ceh1'][0:76]))]
-
+rt = pearsonr(z_ma_values, fallacy)
+print('R correlation Rad Model - observed fallacy:  ' + str(rt))
 
 
