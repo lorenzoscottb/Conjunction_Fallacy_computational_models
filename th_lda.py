@@ -2,12 +2,18 @@
 """""""""
 author: loreznoscottb
 
-default settign will work with english corpus. To change that, 
+script compute the attend Z measure (see Crupi, Tentori & Gonzalex, 2007)
+for given scenario(s). The implementation is an original work of Lorenzo Scott Bertolini, 
+inspiered by experimental evidences from Griffith et al., 2007 and Wajima et al., 2011.
+
+Default settign will work with english corpus. To change that, 
 look at word paramenter of doc2lda (corpora _tools.py)
 
+LIMITS:
 for now, h can have max 2 words in it
 length h can be 1 or 2 for now
 p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
+
 
 Z Confirmation Measure:
 
@@ -15,10 +21,6 @@ Z Confirmation Measure:
        Z(A, E) = (p(A | E) - p(A)) / (1 - p(A)
    else:
        Z(A, E) = (p(A | E) - p(A)) / p(A)
-
-for now, h can have max 2 words in it
-length h can be 1 or 2 for now
-p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
 """
 
 ##############################################
