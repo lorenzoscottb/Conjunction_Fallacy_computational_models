@@ -1,4 +1,13 @@
 
+"""""""""
+author: loreznoscottb
+
+script compute fallacy estimation for eaxh scario based on two models:
+        
+        - Bhatia (see Bhatia, 2017)
+        - RAD an original implementation, authors are Lorenzo Scott Bertolini and Katya Tentori
+
+"""
 
 ##############################################
 
