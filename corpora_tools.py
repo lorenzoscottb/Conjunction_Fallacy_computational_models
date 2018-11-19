@@ -30,30 +30,6 @@ from gensim import corpora, models
 
 #############################################
 
-# Paisa
-paisa_raw = '/Users/lorenzoscottb/Documents/corpora/paisa.raw.utf8'
-paisa_ann = '/Users/lorenzoscottb/Documents/corpora/paisa.annotated.CoNLL.utf8'
-paisa = '/Users/lorenzoscottb/Documents/corpora/paisa'
-
-# Guardian articles
-guardian = '/Users/lorenzoscottb/Documents/corpora/Guardian/' \
-          'TheGuardian.com_Articles_Corpus'
-
-# Europar it-en (with readline() method thay have same number of line)
-ep_it = '/Users/lorenzoscottb/Documents/corpora/europarl/it-en/it-en_it.txt'
-ep_en = '/Users/lorenzoscottb/Documents/corpora/europarl/it-en/it-en_en.txt'
-
-en_trian = '/Users/lorenzoscottb/Documents/corpora/en_train'
-
-usps = '/Users/lorenzoscottb/Documents/corpora/usps'
-
-# italian dependecy tree
-dpie = '/Users/lorenzoscottb/Documents/corpora/DPIE_Development_DS_1/isdt_train.conll'
-
-# samples
-gattopardo = '/Users/lorenzoscottb/Documents/corpora/trama_gattopardo.txt'
-
-
 # Stopwords
 en_stop = stopwords.words('english')
 en_stop.append("'d")
