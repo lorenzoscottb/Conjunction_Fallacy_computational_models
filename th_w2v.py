@@ -78,7 +78,7 @@ columns = data.columns
 
 
 # Google News pre trained vectors
-gn_model = gensim.models.KeyedVectors.load_word2vec_format('/path/to/bin/vectors, binary=True)
+gn_model = gensim.models.KeyedVectors.load_word2vec_format('/path/to/bin/vectors', binary=True)
 
 # vocabulary = [word.strip('.1') for word in set(nltk.word_tokenize(str(options+scenarios))) if
 #               word not in en_stop and word not in punctuation and word.strip('.1')
