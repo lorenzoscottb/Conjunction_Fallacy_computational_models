@@ -67,22 +67,18 @@ subject_n = 38
 scenario_n = 82
 
 # Pure stimuli
-st = pd.read_excel('/Users/lb540/Documents/uni/data/cnj_fllc/'
-                   'stimuli.xlsx')
+st = pd.read_excel('/path/to/stimuli.xlsx') # can dowload in repository
 options = st.values
 scenarios = st.columns
 
 # subjects' data (values[x] = subj_x)
-data = pd.read_excel('/Users/lb540/Documents/uni/data/cnj_fllc/'
-                     'data.xlsx')
+data = pd.read_excel('path/to/data/file) # presuppose you have an excell file with a fallacy_x_scenario variable 
 values = data.values
 columns = data.columns
 
 
 # Google News pre trained vectors
-gn_model = gensim.models.KeyedVectors.load_word2vec_format('/Users/lb540/Documents/corpora/google_news/'
-                                                           'googlenews-vectors-negative300.bin',
-                                                           binary=True)
+gn_model = gensim.models.KeyedVectors.load_word2vec_format('/path/to/bin/vectors, binary=True)
 
 # vocabulary = [word.strip('.1') for word in set(nltk.word_tokenize(str(options+scenarios))) if
 #               word not in en_stop and word not in punctuation and word.strip('.1')
@@ -131,16 +127,17 @@ rad_fall = [e[1]*e[2]*(1-e[0]) for e in rad_values]
 
 #############################################
 
+# sets configurations for seaborn plot
 sns.set(color_codes=True)
 sns.set_style("whitegrid")
 
 # single plot
-btg = sns.regplot(data['Fallacy percentage'][0:82], bt_fall, color='g')
+btg = sns.regplot(data['fallacy_x_scenario'][0:82], bt_fall, color='g')
 
 # double plot
 col_name = ['Bhatia prob', 'Rad prob']
 mdl_name = ['Bhatia', 'Rad']
-x = data['Fallacy percentage'][0:82]
+x = data['fallacy_x_scenario'][0:82]
 ys = [bt_fall, rad_fall]
 color = ['b', 'g']
 
