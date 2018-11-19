@@ -73,8 +73,6 @@ scenarios = st.columns
 
 # subjects' data (values[x] = subj_x)
 data = pd.read_excel('path/to/data/file) # presuppose you have an excell file with a fallacy_x_scenario variable 
-values = data.values
-columns = data.columns
 
 
 # Google News pre trained vectors
