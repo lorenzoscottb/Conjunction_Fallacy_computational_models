@@ -100,7 +100,7 @@ def p_h(word, corpus):
             if word[0] and word[1] in w:
                 count_h += 1
 
-    return count_ h /count_total
+    return count_h /count_total
 
 
 def p_he(e, h, model, matrix, vocabulary):
