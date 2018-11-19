@@ -2,6 +2,9 @@
 """""""""
 author: loreznoscottb
 
+default settign will work with english corpus. To change that, 
+look at word paramenter of doc2lda (corpora _tools.py)
+
 for now, h can have max 2 words in it
 length h can be 1 or 2 for now
 p(h|e) = sumz[p(h|Tz)*p((Tz|e)]
@@ -164,10 +167,6 @@ def z_measure(e, h, model, matrix, vocabulary, corpus):
 #  Corpus to lda space
 
 #############################################
-
-print('which corpus to use?\nfolder\nguardian\nen_train\nsmall_train')
-
-c = input()
 
 print('length of vector\'s dimensions?')
 dim = round(float(input()))
