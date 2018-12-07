@@ -1,5 +1,5 @@
-# corpus_approach_to_CF
-This repository contains the code for my master thesis: Corpus-Based Approach to Conjunction Fallacy
+# Corpus-Based Approach to Conjunction Fallacy
+This repository contains the code for my master's thesis
 
 Abstract: 
 
